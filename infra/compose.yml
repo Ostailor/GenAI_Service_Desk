@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+  api:
+    image: python:3.11-slim
+    command: ["sleep", "infinity"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "exit(0)"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
