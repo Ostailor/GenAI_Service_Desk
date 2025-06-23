@@ -1,20 +1,23 @@
 #!/bin/bash
 set -euo pipefail
 
-cd "$(dirname "$0")/infra"
+cd "$(dirname "$0")"
+# Ensure Python can import the src package when running scripts directly
+export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"
 
-docker compose up -d --build
+COMPOSE_FILE="infra/compose.yml"
+docker compose -f "$COMPOSE_FILE" up -d --build
 
 retries=60
 sleep_interval=2
-containers=$(docker compose ps -q)
+containers=$(docker compose -f "$COMPOSE_FILE" ps -q)
 
 while [ "$retries" -gt 0 ]; do
     all_healthy=true
     for container in $containers; do
         status=$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$container")
         if [[ "$status" == "unhealthy" || "$status" == "exited" ]]; then
-            docker compose down
+            docker compose -f "$COMPOSE_FILE" down
             exit 1
         fi
         if [[ "$status" != "healthy" ]]; then
@@ -24,10 +27,10 @@ while [ "$retries" -gt 0 ]; do
 
     if [ "$all_healthy" = true ]; then
         DATABASE_URL="postgresql+psycopg2://postgres:postgres@localhost:5432/postgres" \
-            alembic -c ../alembic.ini upgrade head
-        python ../scripts/seed_demo.py
-        python ../scripts/db_health.py
-        docker compose down
+            alembic -c alembic.ini upgrade head
+        python scripts/seed_demo.py
+        python scripts/db_health.py
+        docker compose -f "$COMPOSE_FILE" down
         exit 0
     fi
 
@@ -35,6 +38,6 @@ while [ "$retries" -gt 0 ]; do
     retries=$((retries - 1))
 done
 
-docker compose down
+docker compose -f "$COMPOSE_FILE" down
 exit 1
 
