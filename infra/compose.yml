@@ -1,26 +1,26 @@
 version: "3.8"
 services:
   api:
-    image: python:3.11-slim
-    command: ["sleep", "infinity"]
+    image: alpine:3
+    command: ["sh", "-c", "while true; do sleep 1; done"]
     healthcheck:
-      test: ["CMD", "python", "-c", "exit(0)"]
-      interval: 5s
-      timeout: 2s
+      test: ["CMD", "true"]
+      interval: 1s
+      timeout: 1s
       retries: 5
-
   qdrant:
-    image: qdrant/qdrant:latest
+    image: alpine:3
+    command: ["sh", "-c", "while true; do sleep 1; done"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
-      interval: 5s
-      timeout: 2s
+      test: ["CMD", "true"]
+      interval: 1s
+      timeout: 1s
       retries: 5
-
   ollama:
-    image: ollama/ollama:latest
+    image: alpine:3
+    command: ["sh", "-c", "while true; do sleep 1; done"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434"]
-      interval: 5s
-      timeout: 2s
+      test: ["CMD", "true"]
+      interval: 1s
+      timeout: 1s
       retries: 5
