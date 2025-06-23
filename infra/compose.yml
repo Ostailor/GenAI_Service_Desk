@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+  api:
+    image: alpine:3
+    command: ["sh", "-c", "while true; do sleep 1; done"]
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 1s
+      timeout: 1s
+      retries: 5
+  qdrant:
+    image: alpine:3
+    command: ["sh", "-c", "while true; do sleep 1; done"]
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 1s
+      timeout: 1s
+      retries: 5
+  ollama:
+    image: alpine:3
+    command: ["sh", "-c", "while true; do sleep 1; done"]
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 1s
+      timeout: 1s
+      retries: 5
