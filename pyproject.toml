@@ -11,6 +11,11 @@ dev = [
     "pytest",
     "pytest-cov",
     "pre-commit",
+    "pydantic>=2",
+    "sqlalchemy>=2",
+    "alembic",
+    "asyncpg",
+    "psycopg2-binary",
 ]
 
 [tool.pytest.ini_options]

@@ -23,6 +23,10 @@ while [ "$retries" -gt 0 ]; do
     done
 
     if [ "$all_healthy" = true ]; then
+        DATABASE_URL="postgresql+psycopg2://postgres:postgres@localhost:5432/postgres" \
+            alembic -c ../alembic.ini upgrade head
+        python ../scripts/seed_demo.py
+        python ../scripts/db_health.py
         docker compose down
         exit 0
     fi
