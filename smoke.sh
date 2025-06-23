@@ -24,3 +24,4 @@ done
 
 docker compose down
 exit 1
+
