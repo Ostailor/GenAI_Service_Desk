@@ -101,9 +101,83 @@ CI pipeline	        GitHub Actions shows both test and smoke jobs green on the d
 Once those four lights are green you’ve locked down a testable, reproducible foundation. All team-mates (and any future recruiter who clones the repo) can run one command, see everything pass, and trust that later phases will slot neatly into place.
 
 Phase 1 – Domain & Data Model
-Define Pydantic/SQLAlchemy models for Tenant, User, Ticket, KnowledgeDoc, Embedding, ChatSession; wire migrations with Alembic.
+You will (1) decide how tenant data is isolated, (2) design the core entities—Tenant, User, Ticket, KnowledgeDoc, Embedding, ChatSession—plus their relationships, (3) implement them twice: as Pydantic v2 models for I/O validation and as SQLAlchemy 2.0 ORM classes for persistence, (4) scaffold automated, repeatable Alembic migrations, (5) load a handful of seed rows so every developer or CI job starts with identical demo data, and (6) extend the project’s smoke script/CI so they fail fast if the schema or seeds break. At the end of the phase you can run a single command that builds containers, applies migrations, inserts seeds, and prints a health summary—independent of all later RAG, LLM, or API work.
 
-Provide a seed.py script that inserts demo tenants and prints row counts—if counts match the manifest the phase is good. 
+1 — Choose your multi-tenant isolation strategy
+Pick a tenancy model: shared-database with a tenant_id column on every business table is the lightest operationally and pairs well with PostgreSQL Row-Level Security (RLS) for guard-rails at the SQL layer.
+
+Enable RLS in the compose-supplied Postgres image (add ALTER TABLE … ENABLE ROW LEVEL SECURITY;). AWS, Azure and Logto blog posts show canonical patterns for pooling models; copy their approach.
+
+Create one application role per service (e.g., api_srv) and grant it only SELECT/INSERT/UPDATE on rows where tenant_id matches the current setting of current_setting('app.tenant_id'). This keeps isolation logic out of ORM code.
+
+2 — Draw the entity-relationship diagram (ERD)
+Entity	           Key attributes	                                                                            Notes
+Tenant	           id (UUID PK), name, plan, created_at	                                                      One row per customer organisation.
+User	             id, tenant_id (FK), email, role, hashed_pw, created_at	                                    Composite uniqueness on (tenant_id, email) prevents cross-tenant collision.
+Ticket	           id, tenant_id, owner_id (FK→User), status, priority, subject, body, created_at, updated_at	Matches common help-desk schemas used by DrawSQL and Reddit threads.
+KnowledgeDoc	     id, tenant_id, title, path, checksum, added_at	                                            Points to PDF or Markdown in object storage.
+Embedding	         id, doc_id (FK), chunk_index, vector (FLOAT[] 768), token_count	                          Store as PostgreSQL vector or FLOAT8[];
+ChatSession	       id, tenant_id, user_id, created_at, summary	                                              Session-level metadata for analytics.
+
+Keep polymorphism minimal—six tables, clear FKs, and a single tenant_id column lets RLS do its job.
+
+3 — Implement dual models: Pydantic v2 & SQLAlchemy 2.0
+Pydantic I/O models live in src/helpdesk_ai/schemas.py. Use field types (EmailStr, PositiveInt) and model-level validators for cross-field logic such as “closed tickets must have a closed_at timestamp”.
+
+SQLAlchemy ORM classes sit in src/helpdesk_ai/models.py. Map with the recommended 2.0 declarative syntax (registry().map_imperatively() or MappedAsDataclass).
+
+Naming conventions (snake_case, date prefixes in constraint names) and avoiding model imports inside migrations follow Alembic best-practice articles; document them in docs/style.md.
+
+4 — Wire Alembic migrations
+Initialise Alembic in infra/migrations/ and point it at your SQLAlchemy Base.metadata.
+
+Configure the env script to read DB connection details from environment variables so it works in both local Docker and CI.
+
+Use alembic revision --autogenerate -m "init" to create migration 0001, then freeze it. Autogenerate is fine for the first cut; later use hand-written upgrades when changes get non-trivial.
+pingcap.com
+
+Add a “migrations” target to smoke.sh: after the Compose database is up, run alembic upgrade head inside the database container or a one-shot migration container.
+
+5 — Seed repeatable demo data
+Write scripts/seed_demo.py that connects using SQLAlchemy’s async engine, inserts two tenants (e.g., “Acme Corp”, “Globex”), three users per tenant, and three open tickets per user.
+
+Capture primary keys into a seed_manifest.json; later test phases can reference known IDs.
+
+The script should be idempotent: running it twice must leave row counts unchanged (upserts or “skip-if-exists”). This pattern is described in multiple SQLAlchemy testing tutorials.
+coderpad.io
+
+Add the seed step to smoke.sh right after alembic upgrade head.
+
+6 — Local health probe for Phase 1
+Create scripts/db_health.py that:
+
+Imports the ORM models.
+
+Counts rows in each table and prints them formatted (“Tenants = 2, Users = 6…”).
+
+Verifies at least one ticket row per tenant and one embedding row per knowledge doc; exit code 0 on success.
+
+smoke.sh now calls:
+
+alembic upgrade head && python scripts/seed_demo.py && python scripts/db_health.py
+
+If any assertion fails the smoke exits non-zero, flagging Phase 1 problems immediately.
+
+7 — CI integration
+Extend the “test” job to spin up the database container and run only the model/seed health checks—these tests are independent of future API or Ollama code.
+
+Keep the “smoke” job from Phase 0 unchanged; it automatically benefits from the new migration + seed steps you added to smoke.sh.
+
+8 — Success criteria for Phase 1
+Signal	                Passing condition
+Alembic migration runs	alembic upgrade head finishes with no errors.
+Seed script idempotent	Invoking twice results in same row counts.
+Health probe	          python scripts/db_health.py exits 0 and prints counts ≥ expected.
+CI	                    Both “test” and “smoke” jobs green after merge.
+Docs	                  docs/style.md explains naming conventions, RLS strategy, and entity list.
+
+Complete those items and you have a self-contained, proven data layer ready for whichever next phase (LLM engine, vector store, API) you decide to tackle—yet still usable on its own for demos, tests, or further ERD tweaks.
+
 
 Phase 2 – Local LLM Runtime (Ollama)
 Package Ollama in its own container, expose /generate, /embeddings, /status; pull Llama-3 weights or another instruction-tuned model. 
