@@ -180,9 +180,77 @@ Complete those items and you have a self-contained, proven data layer ready for 
 
 
 Phase 2 – Local LLM Runtime (Ollama)
-Package Ollama in its own container, expose /generate, /embeddings, /status; pull Llama-3 weights or another instruction-tuned model. 
+Building on the green baseline from Phases 0 and 1, Phase 2 turns the project into a working “mini-LLMOps” layer: a locally-hosted Ollama server running Meta Llama-3, containerised with GPU support, exposed through stable REST endpoints (/generate, /embeddings, /status) and protected by health-checks and repeatable tests. When this phase is done you will be able to spin-up the stack, hit the model, measure latency / tokens-per-second, and see every test pass in CI—without touching any later phases.
 
-check_llm.py sends a 10-token prompt and asserts a non-empty reply under 1 s—pass ⇒ phase complete.
+1 Choose the model & verify resource needs
+Model Pick Llama-3-8B-Instruct first; it is openly licensed, ~16 GB on disk and ~20 GB VRAM in FP16 so it fits a single modern GPU or an Apple-M-series machine.
+
+Upgrade path Document that the 70 B variant needs ≈140 GB VRAM and >140 GB disk; keep it optional for multi-GPU nodes.
+
+2 Local installation proof-of-life
+Install the CLI (brew install ollama or Linux tarball) and pull the model with
+ollama pull llama3—the CLI only downloads the diff on updates.
+
+Start the daemon (ollama serve). By default it listens on port 11434.
+
+Run a one-line smoke prompt:
+curl http://localhost:11434/api/generate -d '{"model":"llama3","prompt":"ping"}'.
+A non-empty JSON reply proves the local binary works.
+
+3 Container-first deployment
+Base image Use the official ollama/ollama image; it already carries the daemon and entry-point.
+
+GPU runtime Follow NVIDIA Container Toolkit instructions so docker run --gpus all exposes the card to the container; same flags work in Compose.
+
+Dockerfile tweaks
+
+Pin the Ollama tag to avoid silent upgrades.
+
+Add a HEALTHCHECK that GETs /status (returns {"status":"ok"} when the model is loaded).
+
+Keep layers slim: copy only the small wrapper script, adopt Docker “best practice” list (multi-stage, .dockerignore, no extra packages).
+
+4 Python access layer
+Write ollama_client.py under src/helpdesk_ai/llm/ that wraps /generate, /embeddings, /status. Switch between streaming and non-streaming, add retry/back-off. API specs are published in the public docs and Postman collection.
+
+Expose generate(prompt, system=None, temperature=0.7) and embed(text) helpers so later phases (RAG, chat) can stay model-agnostic.
+
+Log timings; Ollama community threads show tokens-per-second benchmarks and a feature request for a built-in metric flag.
+
+5 Compose integration & health route
+Add a new service block ollama to infra/compose.yml (if not already stubbed):
+
+Map 11434:11434.
+
+Mount an anonymous volume for downloaded models so CI containers don’t re-pull on every run.
+
+Include the Dockerfile’s HEALTHCHECK—Compose surfaces it via docker compose ps.
+
+Update smoke.sh: after the database checks from Phase 1, poll docker compose ps until ollama is healthy, then run a single test prompt via curl and exit on non-zero.
+
+6 Tests you add in this phase
+Test focus	Tooling	Pass condition
+Daemon status	pytest + httpx	GET /status returns 200 JSON {"status":"ok"} under 200 ms. 
+Text generation	pytest (non-stream)	POST /generate with prompt “Hello” returns non-empty response field. 
+Embeddings	pytest	POST /embeddings on “hello world” returns a vector length 768 (the default from many Ollama embedding models).
+Latency budget	pytest-benchmark	20-token prompt P95 < 1 s on dev machine or < 2 s on CI CPU box. Benchmarks inspired by community scripts measuring t/s.
+Concurrent safety	pytest + trio/anyio	Fire 10 parallel /generate calls; all must complete, none returns 5xx.
+
+Tests live in tests/llm/ so CI can run them before any later-phase tests.
+
+7 CI workflow updates
+Install GPU driver layer only on self-hosted runners; on GitHub-hosted Ubuntu, stay CPU-only and accept slower latency threshold.
+
+Add a new job llm-tests after lint but before the Phase 1 smoke; use the same Compose stack, then run pytest tests/llm -q.
+
+8 Success criteria for Phase 2
+Signal	                                Requirement
+Local prompt works	                    curl …/generate returns text.
+Compose container healthy	              docker compose ps shows healthy within 60 s of start-up.
+Test suite green	                      pytest tests/llm passes locally and in CI.
+Performance goal met	                  P95 latency & tokens/sec within documented budget on dev hardware.
+Smoke script updated	                  ./smoke.sh now validates DB and LLM in one pass, still exits 0.
+
 
 Phase 3 – Vector Store & Knowledge Loader
 Stand-up Qdrant; write an ETL that chunks docs, calls Ollama’s embedding endpoint, and loads vectors into per-tenant collections or partitioned payloads. 
