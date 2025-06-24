@@ -1,9 +1,6 @@
 import os
 
-from sqlalchemy import create_engine, func, select
-from sqlalchemy.orm import Session
-
-from src.helpdesk_ai.models import (
+from helpdesk_ai.models import (
     ChatSession,
     Embedding,
     KnowledgeDoc,
@@ -11,6 +8,8 @@ from src.helpdesk_ai.models import (
     Ticket,
     User,
 )
+from sqlalchemy import create_engine, func, select
+from sqlalchemy.orm import Session
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
