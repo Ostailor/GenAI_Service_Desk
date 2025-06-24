@@ -30,6 +30,8 @@ while [ "$retries" -gt 0 ]; do
             alembic -c alembic.ini upgrade head
         python scripts/seed_demo.py
         python scripts/db_health.py
+        curl -fsS -X POST http://localhost:11434/api/generate \
+            -d '{"model":"llama3","prompt":"ping","stream":false}' >/dev/null
         docker compose -f "$COMPOSE_FILE" down
         exit 0
     fi
