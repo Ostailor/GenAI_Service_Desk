@@ -16,6 +16,9 @@ dev = [
     "alembic",
     "asyncpg",
     "psycopg2-binary",
+    "httpx",
+    "pytest-benchmark",
+    "anyio",
 ]
 
 [tool.pytest.ini_options]

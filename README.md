@@ -8,3 +8,16 @@ Use `./smoke.sh` to spin up the Docker Compose stack and verify that every
 service becomes healthy. Once up, the script applies Alembic migrations,
 loads demo seed data and runs a database health probe before tearing the stack
 down.
+
+## Local LLM runtime
+
+Phase 2 introduces an Ollama container running the Llama 3 8B model. Pull the
+model and verify the CLI:
+
+```bash
+ollama pull llama3
+ollama serve &
+curl http://localhost:11434/api/generate -d '{"model":"llama3","prompt":"ping"}'
+```
+
+The 70B variant requires over 140&nbsp;GB of VRAM and disk so remains optional.

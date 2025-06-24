@@ -16,12 +16,22 @@ services:
       timeout: 1s
       retries: 5
   ollama:
-    image: alpine:3
-    command: ["sh", "-c", "while true; do sleep 1; done"]
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ["gpu"]
     healthcheck:
-      test: ["CMD", "true"]
-      interval: 1s
-      timeout: 1s
+      test: ["CMD", "curl", "-fs", "http://localhost:11434/api/status"]
+      interval: 10s
+      timeout: 5s
       retries: 5
   db:
     image: postgres:15
@@ -36,3 +46,6 @@ services:
       interval: 1s
       timeout: 1s
       retries: 5
+
+volumes:
+  ollama:
