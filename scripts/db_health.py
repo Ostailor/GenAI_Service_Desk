@@ -1,4 +1,11 @@
 import os
+import sys
+from pathlib import Path
+
+from sqlalchemy import create_engine, func, select
+from sqlalchemy.orm import Session
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from helpdesk_ai.models import (
     ChatSession,
@@ -8,8 +15,6 @@ from helpdesk_ai.models import (
     Ticket,
     User,
 )
-from sqlalchemy import create_engine, func, select
-from sqlalchemy.orm import Session
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
