@@ -23,11 +23,6 @@ services:
       - "11434:11434"
     volumes:
       - ollama:/root/.ollama
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities: ["gpu"]
     healthcheck:
       test: ["CMD", "curl", "-fs", "http://localhost:11434/api/status"]
       interval: 10s
