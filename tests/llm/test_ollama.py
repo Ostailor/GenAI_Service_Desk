@@ -5,9 +5,10 @@ from pathlib import Path
 import anyio
 import httpx
 import pytest
+
 from helpdesk_ai.llm.ollama_client import OllamaClient
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 INFRA = ROOT / "infra"
 
 
