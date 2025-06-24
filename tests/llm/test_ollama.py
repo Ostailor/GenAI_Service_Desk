@@ -8,7 +8,7 @@ import pytest
 
 from helpdesk_ai.llm.ollama_client import OllamaClient
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 INFRA = ROOT / "infra"
 
 
