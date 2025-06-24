@@ -16,6 +16,7 @@ services:
       timeout: 1s
       retries: 5
   ollama:
+    platform: linux/arm64
     build:
       context: .
       dockerfile: Dockerfile.ollama
