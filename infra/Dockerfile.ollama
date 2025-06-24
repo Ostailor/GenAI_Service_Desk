@@ -1,4 +1,4 @@
-FROM ollama/ollama:0.1.32
+FROM --platform=linux/arm64 ollama/ollama:0.1.32
 COPY start_ollama.sh /start_ollama.sh
 HEALTHCHECK --interval=10s --timeout=5s --retries=5 CMD curl -fs http://localhost:11434/api/status | grep -q '"status":"ok"'
 ENTRYPOINT ["/start_ollama.sh"]
