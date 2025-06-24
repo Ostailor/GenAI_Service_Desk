@@ -20,4 +20,8 @@ ollama serve &
 curl http://localhost:11434/api/generate -d '{"model":"llama3","prompt":"ping"}'
 ```
 
+The Compose stack runs the model on CPU unless you add a GPU reservation. If you
+have an NVIDIA card, uncomment the `deploy` block in `infra/compose.yml` or add
+an equivalent `--gpus` flag when running Docker.
+
 The 70B variant requires over 140&nbsp;GB of VRAM and disk so remains optional.
