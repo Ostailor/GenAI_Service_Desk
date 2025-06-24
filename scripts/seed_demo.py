@@ -2,10 +2,9 @@ import json
 import os
 import uuid
 
+from helpdesk_ai.models import Base, Tenant, Ticket, User
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
-
-from src.helpdesk_ai.models import Base, Tenant, Ticket, User
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
