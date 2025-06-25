@@ -253,9 +253,98 @@ Smoke script updated	                  ./smoke.sh now validates DB and LLM in on
 
 
 Phase 3 – Vector Store & Knowledge Loader
-Stand-up Qdrant; write an ETL that chunks docs, calls Ollama’s embedding endpoint, and loads vectors into per-tenant collections or partitioned payloads. 
+Phase 3 turns the project into a self-contained “knowledge layer”: every tenant can upload docs, the pipeline chunks them, creates embeddings with your local Ollama model, inserts them into Qdrant, and proves the vectors can be recalled with good accuracy. All of this is fully test-driven and independent of later RAG or API work.
 
-recall_check.py runs K-NN on a labelled mini-set and prints recall@5 ≥ 0.80 → success.
+1 Overview of the work in this phase
+You will (1) decide how multitenancy is represented inside the vector store, (2) build a document-loader & chunker that handles PDFs, Markdown and HTML, (3) call Ollama’s /embeddings route to produce 768-dim vectors, (4) tune and create Qdrant collections/HNSW indexes, (5) write an idempotent ETL script that ingests and updates content, (6) expose health metrics, and (7) extend both your pytest suite and smoke.sh so Phase 3 breaks loudly if anything drifts. When complete you can start the stack, run python scripts/load_docs.py, and immediately query the store for top-k results—tests verify isolation, dimension, recall and latency.
+
+2 Multitenancy design in Qdrant
+Partition by payload, not by collection. Qdrant recommends a single collection with a tenant_id payload filter for most SaaS cases, calling the pattern “multitenancy” and warning that per-tenant collections waste RAM and complicate scaling 
+
+Security guard-rail. Add a Postgres-style Row-Level Security analogue: every query the back-end issues includes filter={"must":[{"key":"tenant_id","match":{"value":<uuid>}}]}—this is enforced in a thin repository layer so later RAG code cannot forget it.
+
+3 Document loading & chunking
+Step	              Recommended tech & rationale
+Parsing             PDFs/HTML	 Use the Unstructured loader from LangChain; it converts many formats and already emits layout metadata 
+
+Chunk strategy	    LangChain’s RecursiveCharacterTextSplitter (or Unstructured chunker) at 512 tokens with 20 token overlap balances context retention and vector length 
+
+File watcher	      A simple watchdog loop scans an uploads/ folder and feeds new or changed files into the ETL.
+
+Each chunk inherits the file’s checksum & path so the loader can upsert instead of duplicating.
+
+4 Embedding generation with Ollama
+Model choice Start with llama3’s default embedding head; Ollama officially exposes /api/embeddings returning vectors (size 768 for Llama and most BGE-family models) 
+ollama.com
+
+Python wrapper Extend the ollama_client.py from Phase 2 with embed(text: str) -> list[float], handling batch requests and retry/back-off.
+
+Latency goal < 100 ms per 512-token chunk on your GPU dev box (documented benchmarks put Llama-3-base in that range) 
+
+5 Qdrant collection & index tuning
+Create one collection called docs.
+
+Vector size = 768, distance = Cosine.
+
+HNSW params m=16, ef_construct=64; later raise ef_search at query time—Qdrant’s optimisation guide shows these as balanced defaults 
+
+Payload schema tenant_id (UUID), doc_id, chunk_index, source (“pdf” | “html” | “md”), text.
+
+Monitoring Enable /metrics and /healthz endpoints (available since v1.5.0) to integrate with Prometheus and your smoke test 
+
+6 Idempotent loader script
+Create scripts/load_docs.py that:
+
+Reads a manifest (YAML/JSON) listing doc paths and tenant IDs.
+
+Calculates SHA-256 checksum; skips re-ingestion if unchanged.
+
+Runs the chunker, calls embed() in batches of 32.
+
+Builds Qdrant “points” with {id, vector, payload} structure 
+
+Upserts via the Python client’s upsert() method 
+
+Logs total vectors, mean latency, failures.
+
+Run it once during smoke.sh so the stack always contains predictable demo data.
+
+7 Observability additions
+Custom Prom metrics doc_loader_ingest_seconds, qdrant_upsert_vectors_total.
+
+Health endpoint Expose GET /knowledge/ready in a tiny FastAPI app; it pings /healthz on Qdrant and /status on Ollama and returns 200 only if both pass.
+
+8 Tests introduced in Phase 3
+Test file	                               What it proves	                            Pass criteria
+tests/knowledge/test_embedding_dim.py	   Ollama returns vectors of expected length.	                          len(vec)==768 
+tests/knowledge/test_chunk_counts.py	   Chunker splits a sample PDF into ≥ N expected chunks (sanity).	      count >= expected_min
+tests/knowledge/test_qdrant_insert.py	   Upsert returns status ok; total vector count equals chunk count.	    sums match
+tests/knowledge/test_tenant_isolation.py Query with wrong tenant_id filter returns 0 hits.	                  assert empty
+tests/knowledge/test_recall_at_5.py	     On a labelled mini-set of 50 Q/A pairs recall@5 ≥ 0.80.              Uses the same evaluation logic as VectorDBBench 
+tests/knowledge/test_latency.py	         Median search latency under 50 ms for 10 random queries (CPU CI target 150 ms).	
+
+All tests use the Compose stack; they live in tests/knowledge/ so they can run immediately after the Phase 2 suite.
+
+9 CI & smoke script changes
+New GitHub job knowledge-tests—depends on llm-tests; spins up Compose, runs loader script, then pytest tests/knowledge -q.
+
+smoke.sh additions
+
+After Ollama health check, call python scripts/load_docs.py --demo.
+
+Curl GET /knowledge/ready; exit non-zero if not 200.
+
+10 Definition of done for Phase 3
+Signal	Requirement
+Loader script	Runs idempotently; prints counts; exits 0.
+Qdrant health	/readyz returns 200 in < 5 s after container start 
+qdrant.tech
+.
+Tests green	All knowledge tests pass locally & in CI.
+Smoke script	Builds stack, loads docs, verifies health, exits 0.
+Docs updated	docs/knowledge.md explains chunk sizes, embedding model, HNSW params, multitenancy filter.
+
+Meet these and you now own a robust, test-backed vector knowledge base—ready for Phase 4’s RAG chain yet fully verifiable on its own.
 
 Phase 4 – Retrieval-Augmented Generation Chain
 Assemble a LangChain pipeline (Retriever → (optional reranker) → LLM) with inline source citations. 
