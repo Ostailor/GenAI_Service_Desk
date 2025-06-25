@@ -24,11 +24,6 @@ services:
       - "11434:11434"
     volumes:
       - ollama:/root/.ollama
-    healthcheck:
-      test: ["CMD", "curl", "-fs", "http://localhost:11434/api/status"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
   db:
     image: postgres:15
     environment:

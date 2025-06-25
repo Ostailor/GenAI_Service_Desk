@@ -1,0 +1,34 @@
+{
+  "tenants": {
+    "Acme Corp": "278856dd-d5f0-492b-a51b-466806b1212d",
+    "Globex": "7f47605a-24b6-4c74-8dcc-d6e8c7fab197"
+  },
+  "users": {
+    "user1@acmecorp.com": "e6bfd2dd-6b6b-47a3-a453-18446595b9bd",
+    "user2@acmecorp.com": "a1cd791f-74f2-4b43-9518-77e3ac81751f",
+    "user3@acmecorp.com": "7b84f3f8-7c43-4683-889a-04debc85425f",
+    "user1@globex.com": "5939d251-46b4-41e1-8d6d-14c72fb208d5",
+    "user2@globex.com": "cfa4b122-3aca-4ed7-90a6-24f411d2446e",
+    "user3@globex.com": "d7953099-177d-491b-b336-1605c207bbbb"
+  },
+  "tickets": {
+    "Issue 1 for user1@acmecorp.com": "7d544189-768c-40db-a7bb-4514d6707230",
+    "Issue 2 for user1@acmecorp.com": "5cb4a2d8-8ba3-41dc-a115-84b2c4b9518c",
+    "Issue 3 for user1@acmecorp.com": "05d84082-35b1-4cd7-ad5c-870fb7fb3c90",
+    "Issue 1 for user2@acmecorp.com": "f273ff12-5884-410b-aa4c-d9a13c7fe21c",
+    "Issue 2 for user2@acmecorp.com": "6e490594-94e3-403b-87df-d16dfbea8e27",
+    "Issue 3 for user2@acmecorp.com": "a2c092c0-8152-424d-92b0-77ac786820f5",
+    "Issue 1 for user3@acmecorp.com": "4c7e2b87-d562-437f-9876-3d748ea82486",
+    "Issue 2 for user3@acmecorp.com": "183d8561-3fe0-42df-aa2e-f1db24216328",
+    "Issue 3 for user3@acmecorp.com": "6d5be3fe-8bbf-4bf3-a261-405bfd39a52c",
+    "Issue 1 for user1@globex.com": "7e7e6c36-25ae-4274-b99d-7f9fb588c697",
+    "Issue 2 for user1@globex.com": "447e2900-1416-4f97-bf13-54c83eabebb1",
+    "Issue 3 for user1@globex.com": "77a96106-aeca-429f-96b5-f8b772c2ddcd",
+    "Issue 1 for user2@globex.com": "da22374b-1bf8-4319-89cb-fdc9cc055b66",
+    "Issue 2 for user2@globex.com": "7a021fe8-ab75-4700-ae78-4a35b099d81a",
+    "Issue 3 for user2@globex.com": "f55b62ad-8e31-4a85-84fe-d7fcb5169e92",
+    "Issue 1 for user3@globex.com": "3e30fbfd-15d1-4189-9ff0-422f03e06a18",
+    "Issue 2 for user3@globex.com": "93cd8b70-dfce-4956-8208-1e40288093d3",
+    "Issue 3 for user3@globex.com": "a7227c1f-9861-4a55-96e8-1a974d3242f3"
+  }
+}

@@ -1,4 +1,9 @@
 FROM --platform=linux/arm64 ollama/ollama:0.1.32
+
 COPY start_ollama.sh /start_ollama.sh
-HEALTHCHECK --interval=10s --timeout=5s --retries=5 CMD curl -fs http://localhost:11434/api/status | grep -q '"status":"ok"'
+# The healthcheck now verifies that the llama3 model is available by name.
+# Add a start-period to give the container time to download the model
+# on the first run.
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 --start-period=5m \
+  CMD ollama list | grep llama3
 ENTRYPOINT ["/start_ollama.sh"]
