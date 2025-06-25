@@ -1,0 +1,7 @@
+FROM python:3.11-slim
+WORKDIR /app
+COPY . /app
+RUN pip install --no-cache-dir .[dev]
+CMD ["uvicorn", "helpdesk_ai.knowledge:app", "--host", "0.0.0.0", "--port", "8000"]
+HEALTHCHECK --interval=5s --timeout=5s --retries=5 CMD curl -fsS http://localhost:8000/knowledge/ready || exit 1
+

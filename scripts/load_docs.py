@@ -1,0 +1,119 @@
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import time
+from pathlib import Path
+from typing import Iterable
+
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, HnswConfig, PointStruct, VectorParams
+from unstructured.partition.auto import partition
+
+from helpdesk_ai.llm.ollama_client import OllamaClient
+
+DEFAULT_COLLECTION = "docs"
+
+
+def _load_text(path: Path) -> str:
+    elements = partition(filename=str(path))
+    return "\n".join(e.text for e in elements if hasattr(e, "text"))
+
+
+def _chunks(text: str) -> list[str]:
+    splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=20)
+    return splitter.split_text(text)
+
+
+def _sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        while True:
+            chunk = f.read(8192)
+            if not chunk:
+                break
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _ensure_collection(client: QdrantClient) -> None:
+    if client.collection_exists(DEFAULT_COLLECTION):
+        return
+    client.create_collection(
+        collection_name=DEFAULT_COLLECTION,
+        vectors_config=VectorParams(size=768, distance=Distance.COSINE),
+        hnsw_config=HnswConfig(m=16, ef_construct=64),
+    )
+
+
+def _points(
+    doc_id: str, tenant_id: str, chunks: Iterable[str], client: OllamaClient
+) -> list[PointStruct]:
+    points = []
+    for idx, chunk in enumerate(chunks):
+        vec = client.embed(chunk)
+        points.append(
+            PointStruct(
+                id=f"{doc_id}-{idx}",
+                vector=vec,
+                payload={
+                    "tenant_id": tenant_id,
+                    "doc_id": doc_id,
+                    "chunk_index": idx,
+                    "text": chunk,
+                },
+            )
+        )
+    return points
+
+
+def load_manifest(manifest_path: Path, tenant_map: dict[str, str]) -> None:
+    client = OllamaClient()
+    qdrant = QdrantClient(url="http://localhost:6333")
+    _ensure_collection(qdrant)
+
+    with open(manifest_path) as f:
+        docs = json.load(f)
+
+    start = time.time()
+    total_vectors = 0
+    for entry in docs:
+        path = Path(entry["path"])
+        tenant_name = entry["tenant"]
+        tenant_id = tenant_map[tenant_name]
+        checksum = _sha256(path)
+        doc_id = checksum
+        text = _load_text(path)
+        chunks = _chunks(text)
+        points = _points(doc_id, tenant_id, chunks, client)
+        qdrant.upsert(collection_name=DEFAULT_COLLECTION, points=points)
+        total_vectors += len(points)
+    duration = time.time() - start
+    print(f"Ingested {total_vectors} vectors in {duration:.2f}s")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--manifest", type=Path, required=False, default=Path("scripts/demo_docs.json")
+    )
+    parser.add_argument(
+        "--seed-manifest", type=Path, default=Path("scripts/seed_manifest.json")
+    )
+    args = parser.parse_args()
+
+    if not args.manifest.exists():
+        raise SystemExit(f"manifest {args.manifest} not found")
+    if not args.seed_manifest.exists():
+        raise SystemExit(f"seed manifest {args.seed_manifest} not found")
+
+    with open(args.seed_manifest) as f:
+        tenant_map = json.load(f)["tenants"]
+
+    load_manifest(args.manifest, tenant_map)
+
+
+if __name__ == "__main__":
+    main()

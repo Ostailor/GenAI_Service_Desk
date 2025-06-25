@@ -19,6 +19,11 @@ dev = [
     "httpx",
     "pytest-benchmark",
     "anyio",
+    "fastapi",
+    "uvicorn",
+    "qdrant-client",
+    "langchain-text-splitters",
+    "unstructured",
 ]
 
 [tool.pytest.ini_options]
@@ -28,7 +33,7 @@ addopts = "-q"
 line-length = 88
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+select = ["E", "F"]
 
 [tool.ruff.format]
 quote-style = "double"
