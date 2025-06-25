@@ -5,7 +5,7 @@ from typing import Any
 
 import httpx
 
-BASE_URL = "http://localhost:11434/api"
+BASE_URL = "http://localhost:11434"
 
 
 class OllamaClient:

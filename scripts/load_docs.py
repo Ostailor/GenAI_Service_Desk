@@ -4,12 +4,18 @@ import argparse
 import hashlib
 import json
 import time
+import uuid
 from pathlib import Path
 from typing import Iterable
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, HnswConfig, PointStruct, VectorParams
+from qdrant_client.models import (
+    Distance,
+    HnswConfigDiff,
+    PointStruct,
+    VectorParams,
+)
 from unstructured.partition.auto import partition
 
 from helpdesk_ai.llm.ollama_client import OllamaClient
@@ -43,8 +49,9 @@ def _ensure_collection(client: QdrantClient) -> None:
         return
     client.create_collection(
         collection_name=DEFAULT_COLLECTION,
-        vectors_config=VectorParams(size=768, distance=Distance.COSINE),
-        hnsw_config=HnswConfig(m=16, ef_construct=64),
+        vectors_config=VectorParams(size=4096, distance=Distance.COSINE),
+        # The hnsw_config parameter now expects an HnswConfigDiff object.
+        hnsw_config=HnswConfigDiff(m=16, ef_construct=64, full_scan_threshold=10000),
     )
 
 
@@ -56,7 +63,9 @@ def _points(
         vec = client.embed(chunk)
         points.append(
             PointStruct(
-                id=f"{doc_id}-{idx}",
+                # Qdrant requires point IDs to be a valid UUID or an integer.
+                # We can generate a deterministic UUID from the doc checksum and chunk index.
+                id=str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{doc_id}-{idx}")),
                 vector=vec,
                 payload={
                     "tenant_id": tenant_id,
@@ -86,6 +95,10 @@ def load_manifest(manifest_path: Path, tenant_map: dict[str, str]) -> None:
         checksum = _sha256(path)
         doc_id = checksum
         text = _load_text(path)
+        # If the document is empty or could not be parsed, skip it.
+        if not text.strip():
+            print(f"Warning: No text extracted from {path}, skipping.")
+            continue
         chunks = _chunks(text)
         points = _points(doc_id, tenant_id, chunks, client)
         qdrant.upsert(collection_name=DEFAULT_COLLECTION, points=points)

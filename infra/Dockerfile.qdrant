@@ -1,0 +1,5 @@
+FROM qdrant/qdrant:latest
+
+# The base image is minimal and does not include curl.
+# Install it so we can define a robust healthcheck in compose.yml.
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*

@@ -2,6 +2,7 @@ import subprocess
 import time
 from pathlib import Path
 
+import asyncio
 import anyio
 import httpx
 import pytest
@@ -57,7 +58,7 @@ def test_generate(ollama_container):
 def test_embeddings(ollama_container):
     client = OllamaClient()
     vec = client.embed("hello world")
-    assert len(vec) == 768
+    assert len(vec) == 4096
 
 
 def test_latency_budget(ollama_container, benchmark):
@@ -82,5 +83,5 @@ async def test_concurrent_generation(ollama_container):
             resp.raise_for_status()
             return resp.json().get("response", "")
 
-    results = await anyio.gather(*[worker(i) for i in range(10)])
+    results = await asyncio.gather(*[worker(i) for i in range(10)])
     assert all(results)

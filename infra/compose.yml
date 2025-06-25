@@ -3,20 +3,29 @@ services:
     build:
       context: ..
       dockerfile: infra/Dockerfile.api
+    ports:
+      - "8000:8000"
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8000/knowledge/ready"]
       interval: 5s
       timeout: 5s
       retries: 5
+      start_period: 30s
   qdrant:
-    image: qdrant/qdrant:latest
+    # Build a custom image to ensure curl is available for the healthcheck.
+    build:
+      context: .
+      dockerfile: Dockerfile.qdrant
     ports:
       - "6333:6333"
     healthcheck:
+      # Now that curl is installed via the custom Dockerfile, we can use it.
       test: ["CMD", "curl", "-fsS", "http://localhost:6333/readyz"]
-      interval: 5s
-      timeout: 5s
+      interval: 10s
+      timeout: 10s
       retries: 5
+      # Give the service more time to initialize before enforcing the health check.
+      start_period: 30s
   ollama:
     platform: linux/arm64
     build:

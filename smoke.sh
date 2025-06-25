@@ -22,12 +22,13 @@ while [ "$retries" -gt 0 ]; do
     echo "--- Checking container statuses (retries left: $retries) ---"
     for container in $containers; do
         name=$(docker inspect -f '{{.Name}}' "$container" | sed 's,^/,,')
+        service_name=$(docker inspect -f '{{ index .Config.Labels "com.docker.compose.service" }}' "$container")
         status=$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$container")
         echo "Container: $name, Status: $status"
 
         if [[ "$status" == "unhealthy" || "$status" == "exited" ]]; then
-            echo "Error: Container $name is $status. Tearing down."
-            docker compose -f "$COMPOSE_FILE" logs "$name"
+            echo "Error: Container $name ($service_name) is $status. Tearing down."
+            docker compose -f "$COMPOSE_FILE" logs "$service_name"
             docker compose -f "$COMPOSE_FILE" down
             exit 1
         fi

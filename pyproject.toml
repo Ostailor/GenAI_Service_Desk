@@ -23,7 +23,7 @@ dev = [
     "uvicorn",
     "qdrant-client",
     "langchain-text-splitters",
-    "unstructured",
+    "unstructured[md,pdf]",
 ]
 
 [tool.pytest.ini_options]

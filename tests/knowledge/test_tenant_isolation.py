@@ -15,7 +15,7 @@ def test_tenant_isolation():
     wrong_tenant = str(uuid.uuid4())
     result = client.search(
         collection_name=DEFAULT_COLLECTION,
-        query_vector=[0.0] * 768,
+        query_vector=[0.0] * 4096,
         query_filter=rest.Filter(
             must=[
                 rest.FieldCondition(
