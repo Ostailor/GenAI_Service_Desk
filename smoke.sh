@@ -42,6 +42,8 @@ while [ "$retries" -gt 0 ]; do
             alembic -c alembic.ini upgrade head
         python scripts/seed_demo.py
         python scripts/db_health.py
+        python scripts/load_docs.py --manifest scripts/demo_docs.json
+        curl -fsS http://localhost:8000/knowledge/ready >/dev/null
         curl -fsS -X POST http://localhost:11434/api/generate \
             -d '{"model":"llama3","prompt":"ping","stream":false}' >/dev/null
         echo "Smoke test successful. Tearing down."

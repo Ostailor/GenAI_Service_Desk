@@ -1,19 +1,21 @@
 services:
   api:
-    image: alpine:3
-    command: ["sh", "-c", "while true; do sleep 1; done"]
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.api
     healthcheck:
-      test: ["CMD", "true"]
-      interval: 1s
-      timeout: 1s
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/knowledge/ready"]
+      interval: 5s
+      timeout: 5s
       retries: 5
   qdrant:
-    image: alpine:3
-    command: ["sh", "-c", "while true; do sleep 1; done"]
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
     healthcheck:
-      test: ["CMD", "true"]
-      interval: 1s
-      timeout: 1s
+      test: ["CMD", "curl", "-fsS", "http://localhost:6333/readyz"]
+      interval: 5s
+      timeout: 5s
       retries: 5
   ollama:
     platform: linux/arm64

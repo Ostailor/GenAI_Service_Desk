@@ -1,0 +1,8 @@
+[
+  {"tenant": "Acme Corp", "path": "docs/sample_docs/setup_sso.md"},
+  {"tenant": "Acme Corp", "path": "docs/sample_docs/reset_password.md"},
+  {"tenant": "Acme Corp", "path": "docs/sample_docs/install_vpn.md"},
+  {"tenant": "Globex", "path": "docs/sample_docs/connect_wifi.md"},
+  {"tenant": "Globex", "path": "docs/sample_docs/report_bug.md"},
+  {"tenant": "Acme Corp", "path": "docs/sample_docs/sample.pdf"}
+]
