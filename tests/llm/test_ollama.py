@@ -3,7 +3,6 @@ import time
 from pathlib import Path
 
 import asyncio
-import anyio
 import httpx
 import pytest
 
