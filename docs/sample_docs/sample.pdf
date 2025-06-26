@@ -1,83 +1,37 @@
-%PDF-1.3
-% ReportLab Generated PDF document http://www.reportlab.com
-<<
-/F1 2 0 R
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
 2 0 obj
-<<
-/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
 3 0 obj
-/Contents 7 0 R /MediaBox [ 0 0 612 792 ] /Parent 6 0 R /Resources <<
-/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
->> /Rotate 0 /Trans <<
-
->> 
-  /Type /Page
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
 endobj
 4 0 obj
-<<
-/PageMode /UseNone /Pages 6 0 R /Type /Catalog
+<< /Length 2310 >>
+stream
+BT
+/F1 12 Tf
+72 720 Td
+(Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.) Tj
+ET
+endstream
 endobj
 5 0 obj
-<<
-/Author (anonymous) /CreationDate (D:20250626055058+00'00') /Creator (ReportLab PDF Library - www.reportlab.com) /Keywords () /ModDate (D:20250626055058+00'00') /Producer (ReportLab PDF Library - www.reportlab.com) 
-  /Subject (unspecified) /Title (untitled) /Trapped /False
-endobj
-6 0 obj
-/Count 1 /Kids [ 3 0 R ] /Type /Pages
-7 0 obj
-/Filter [ /ASCII85Decode /FlateDecode ] /Length 644
-stream
-GarVLbAQ)h%(taRk*QnlGIL,jF'gp27=Z5g1D4O\e\_uqD>X((]UMV+Kakqc35_/XI)+UA_tJ0apcRQlm/`":(ag;@L)Z(qpblI3qVb\*ZcC)sH]/Qg%i!X2\Gpl5.2Pt_?/_*8IS-'r9C%+J&V\Q678C:Z;^G"mfKtj`?)c1UBO)=:4@J(7I)>Xof93.",UWrX%mi0H::\UWC<"JS$WT[?Ki&XYaGE^;nS@*:[:I=Xlj)<K9n]V%ie?4O@#@r6.!"-dA]h/rD$B!3'm8=8#;HlVb_eNkcm$VqPA@`sP/d_T-[;&CW6-Xb`21(_EJNm,@knfgBWa6^C<>j^jFBdP[?2g>Ep"G_V%R^N!V_:MNT`^Qdj.[^im,?A(oa;@Q6_,5abarXbYXcJj(.[2fDoue*@qcNdq59\1N"/fih]"$'M4PoHte9UHaDQs/\nO"(ZS%T%&c1>9obQN)9J#8X]gh"\O@,h7,Vt[J(aJMb&Qem71Hh?D-V>$-_%85eG@a$liuFJWK$l6QC,n+"Y2XlJc0@T9f-ICk=-'Go#)Qi%RD3/.H'eOW43&`MH()[hEineO5RPDI#7&R?&bo-Ze7.^Q*t)G-g3=kCl@@LKC;doMe:k%%Ad3B28q55p1rXP0*@7nf)~>endstream
-0 8
-0000000073 00000 n 
-0000000104 00000 n 
-0000000211 00000 n 
-0000000404 00000 n 
-0000000472 00000 n 
-0000000768 00000 n 
-0000000827 00000 n 
-/ID 
-[<9b7991adfe472179e0ce11f73b809428><9b7991adfe472179e0ce11f73b809428>]
-% ReportLab generated PDF document -- digest (http://www.reportlab.com)
-
-/Info 5 0 R
-/Root 4 0 R
-/Size 8
->>
-1561
-endobj
-8 0 obj
-<<
-/Producer (PyFPDF 1.7.2 http://pyfpdf.googlecode.com/)
-/CreationDate (D:20250625051230)
->>
-endobj
-9 0 obj
-<<
-/Type /Catalog
-/Pages 1 0 R
-/OpenAction [3 0 R /FitH null]
-/PageLayout /OneColumn
->>
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
 xref
-0 10
-0000000000 65535 f 
-0000000861 00000 n 
-0000001050 00000 n 
-0000000009 00000 n 
-0000000087 00000 n 
-0000000441 00000 n 
-0000000519 00000 n 
-0000000954 00000 n 
-0000001154 00000 n 
-0000001263 00000 n 
+0 7
+0000000000 65535 f
+0000000000 00000 n
+0000000009 00000 n
+0000000058 00000 n
+0000000115 00000 n
+0000000241 00000 n
+0000002603 00000 n
 trailer
-<<
-/Size 10
-/Root 9 0 R
-/Info 8 0 R
->>
+<< /Root 1 0 R /Size 7 >>
 startxref
-1366
+2673
 %%EOF
