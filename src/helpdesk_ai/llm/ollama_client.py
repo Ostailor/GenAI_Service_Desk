@@ -29,7 +29,14 @@ class OllamaClient:
         raise RuntimeError("unreachable")
 
     def status(self) -> dict[str, Any]:
-        return self._request("GET", "/status").json()
+        """Return a simple health status for the Ollama server."""
+        # Older versions of Ollama exposed ``/status`` which returned
+        # ``{"status": "ok"}``. Newer releases dropped that route so we
+        # query ``/tags`` instead. The exact payload is not important here –
+        # a 200 response proves the daemon is reachable.
+
+        self._request("GET", "/tags")
+        return {"status": "ok"}
 
     def generate(
         self,

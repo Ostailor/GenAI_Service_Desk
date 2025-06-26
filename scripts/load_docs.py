@@ -64,7 +64,7 @@ def _points(
         points.append(
             PointStruct(
                 # Qdrant requires point IDs to be a valid UUID or an integer.
-                # We can generate a deterministic UUID from the doc checksum and chunk index.
+                # Use a deterministic UUID derived from the checksum and index.
                 id=str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{doc_id}-{idx}")),
                 vector=vec,
                 payload={
