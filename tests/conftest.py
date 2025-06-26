@@ -1,3 +1,4 @@
+import shutil
 import subprocess
 import time
 from typing import Iterable
@@ -35,6 +36,8 @@ def wait_for_services(services: Iterable[str], infra_dir: str = "infra") -> None
 
 @pytest.fixture(scope="session", autouse=True)
 def ensure_services() -> None:
+    if shutil.which("docker") is None:
+        pytest.skip("docker not available")
     services = ["db", "qdrant", "ollama", "api"]
     subprocess.run(
         [

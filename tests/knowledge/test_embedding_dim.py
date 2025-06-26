@@ -1,4 +1,8 @@
-from helpdesk_ai.llm.ollama_client import OllamaClient
+import pytest
+
+pytest.importorskip("httpx")
+
+from helpdesk_ai.llm.ollama_client import OllamaClient  # noqa: E402
 
 
 def test_embedding_dimension():

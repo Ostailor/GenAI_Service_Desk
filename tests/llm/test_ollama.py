@@ -3,10 +3,12 @@ import time
 from pathlib import Path
 
 import asyncio
-import httpx
 import pytest
 
-from helpdesk_ai.llm.ollama_client import OllamaClient
+pytest.importorskip("httpx")
+import httpx  # noqa: E402
+
+from helpdesk_ai.llm.ollama_client import OllamaClient  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 INFRA = ROOT / "infra"
