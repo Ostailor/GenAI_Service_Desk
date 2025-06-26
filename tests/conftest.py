@@ -1,8 +1,14 @@
 import subprocess
 import time
+from typing import Iterable
+
 import pytest
 
-def wait_for_container_healthy(service_name, infra_dir="infra", timeout=120):
+
+def wait_for_container_healthy(
+    service_name: str, infra_dir: str = "infra", timeout: int = 300
+) -> None:
+    """Poll Docker until the container for service_name is healthy."""
     container_id = subprocess.check_output(
         ["docker", "compose", "ps", "-q", service_name], cwd=infra_dir, text=True
     ).strip()
@@ -21,11 +27,27 @@ def wait_for_container_healthy(service_name, infra_dir="infra", timeout=120):
         time.sleep(2)
     raise RuntimeError(f"{service_name} did not become healthy in time")
 
+
+def wait_for_services(services: Iterable[str], infra_dir: str = "infra") -> None:
+    for svc in services:
+        wait_for_container_healthy(svc, infra_dir=infra_dir)
+
+
 @pytest.fixture(scope="session", autouse=True)
-def ensure_services():
-    # Start all required services
-    subprocess.run(["docker", "compose", "up", "-d", "--build", "db", "qdrant", "ollama", "api"], cwd="infra", check=True)
-    for service in ["db", "qdrant", "ollama", "api"]:
-        wait_for_container_healthy(service)
+def ensure_services() -> None:
+    services = ["db", "qdrant", "ollama", "api"]
+    subprocess.run(
+        [
+            "docker",
+            "compose",
+            "up",
+            "-d",
+            "--build",
+            *services,
+        ],
+        cwd="infra",
+        check=True,
+    )
+    wait_for_services(services)
     yield
     subprocess.run(["docker", "compose", "down"], cwd="infra", check=True)
