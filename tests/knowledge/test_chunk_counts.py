@@ -1,6 +1,11 @@
 from pathlib import Path
 
-from scripts.load_docs import _chunks, _load_text
+import pytest
+
+pytest.importorskip("unstructured.partition.auto")
+pytest.importorskip("langchain_text_splitters")
+
+from scripts.load_docs import _chunks, _load_text  # noqa: E402
 
 
 def test_chunk_counts():

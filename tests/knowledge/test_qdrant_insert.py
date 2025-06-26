@@ -1,9 +1,14 @@
 import json
 from pathlib import Path
 
-from qdrant_client import QdrantClient
+import pytest
 
-from scripts.load_docs import DEFAULT_COLLECTION, load_manifest
+pytest.importorskip("qdrant_client")
+pytest.importorskip("httpx")
+
+from qdrant_client import QdrantClient  # noqa: E402
+
+from scripts.load_docs import DEFAULT_COLLECTION, load_manifest  # noqa: E402
 
 
 def test_qdrant_insert(tmp_path):

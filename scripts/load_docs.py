@@ -8,15 +8,25 @@ import uuid
 from pathlib import Path
 from typing import Iterable
 
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from qdrant_client import QdrantClient
+try:
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    RecursiveCharacterTextSplitter = None
+try:
+    from qdrant_client import QdrantClient
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    QdrantClient = None
 from qdrant_client.models import (
     Distance,
     HnswConfigDiff,
     PointStruct,
     VectorParams,
 )
-from unstructured.partition.auto import partition
+
+try:
+    from unstructured.partition.auto import partition
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    partition = None
 
 from helpdesk_ai.llm.ollama_client import OllamaClient
 
@@ -24,11 +34,15 @@ DEFAULT_COLLECTION = "docs"
 
 
 def _load_text(path: Path) -> str:
+    if partition is None:  # pragma: no cover - optional dependency
+        raise RuntimeError("unstructured package is required for _load_text")
     elements = partition(filename=str(path))
     return "\n".join(e.text for e in elements if hasattr(e, "text"))
 
 
 def _chunks(text: str) -> list[str]:
+    if RecursiveCharacterTextSplitter is None:  # pragma: no cover
+        raise RuntimeError("langchain-text-splitters is required for _chunks")
     splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=20)
     return splitter.split_text(text)
 

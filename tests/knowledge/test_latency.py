@@ -1,12 +1,18 @@
 import json
 from pathlib import Path
 
-from pytest_benchmark.fixture import BenchmarkFixture
-from qdrant_client import QdrantClient
-from qdrant_client.http import models as rest
+import pytest
 
-from helpdesk_ai.llm.ollama_client import OllamaClient
-from scripts.load_docs import DEFAULT_COLLECTION, load_manifest
+pytest.importorskip("qdrant_client")
+pytest.importorskip("pytest_benchmark")
+pytest.importorskip("httpx")
+
+from pytest_benchmark.fixture import BenchmarkFixture  # noqa: E402
+from qdrant_client import QdrantClient  # noqa: E402
+from qdrant_client.http import models as rest  # noqa: E402
+
+from helpdesk_ai.llm.ollama_client import OllamaClient  # noqa: E402
+from scripts.load_docs import DEFAULT_COLLECTION, load_manifest  # noqa: E402
 
 
 def test_search_latency(benchmark: BenchmarkFixture):
