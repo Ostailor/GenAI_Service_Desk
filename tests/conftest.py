@@ -36,7 +36,7 @@ def wait_for_services(services: Iterable[str], infra_dir: str = "infra") -> None
 
 
 @pytest.fixture(scope="session", autouse=True)
-def warm_ollama():
+def warm_ollama(ensure_services):
     httpx.post(
         "http://localhost:11434/api/generate",
         json={"model": "llama3", "prompt": "ping", "stream": False},
