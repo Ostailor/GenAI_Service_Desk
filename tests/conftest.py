@@ -2,6 +2,7 @@ import shutil
 import subprocess
 import time
 from typing import Iterable
+import httpx
 
 import pytest
 
@@ -32,6 +33,15 @@ def wait_for_container_healthy(
 def wait_for_services(services: Iterable[str], infra_dir: str = "infra") -> None:
     for svc in services:
         wait_for_container_healthy(svc, infra_dir=infra_dir)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def warm_ollama(ensure_services):
+    httpx.post(
+        "http://localhost:11434/api/generate",
+        json={"model": "llama3", "prompt": "ping", "stream": False},
+        timeout=httpx.Timeout(read=300),
+    ).raise_for_status()
 
 
 @pytest.fixture(scope="session", autouse=True)

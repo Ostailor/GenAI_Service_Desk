@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.slow
+
 pytest.importorskip("qdrant_client")
 pytest.importorskip("pytest_benchmark")
 pytest.importorskip("httpx")

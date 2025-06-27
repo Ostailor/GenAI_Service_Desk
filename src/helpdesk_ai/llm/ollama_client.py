@@ -19,7 +19,8 @@ class OllamaClient:
         url = f"{self.base_url}{path}"
         for delay in (0.0, 0.5, 1.0):
             try:
-                resp = self._client.request(method, url, json=json, timeout=30)
+                timeout = httpx.Timeout(connect=5, read=120, write=120, pool=60)
+                resp = self._client.request(method, url, json=json, timeout=timeout)
                 resp.raise_for_status()
                 return resp
             except httpx.HTTPError:
