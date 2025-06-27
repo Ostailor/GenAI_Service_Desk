@@ -72,9 +72,16 @@ def _ensure_collection(client: QdrantClient) -> None:
 def _points(
     doc_id: str, tenant_id: str, chunks: Iterable[str], client: OllamaClient
 ) -> list[PointStruct]:
+    chunk_list = list(chunks)
+    resp = client._request(
+        "POST",
+        "/embeddings",
+        json={"model": "llama3", "prompt": chunk_list},
+    )
+    vectors = resp.json().get("embedding", [])
+
     points = []
-    for idx, chunk in enumerate(chunks):
-        vec = client.embed(chunk)
+    for idx, (chunk, vec) in enumerate(zip(chunk_list, vectors)):
         points.append(
             PointStruct(
                 # Qdrant requires point IDs to be a valid UUID or an integer.

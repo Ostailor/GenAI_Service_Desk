@@ -2,8 +2,10 @@ import subprocess
 import time
 from pathlib import Path
 
-import asyncio
+import anyio
 import pytest
+
+pytestmark = pytest.mark.slow
 
 pytest.importorskip("httpx")
 import httpx  # noqa: E402
@@ -84,5 +86,5 @@ async def test_concurrent_generation(ollama_container):
             resp.raise_for_status()
             return resp.json().get("response", "")
 
-    results = await asyncio.gather(*[worker(i) for i in range(10)])
+    results = await anyio.gather(*[worker(i) for i in range(10)])
     assert all(results)
