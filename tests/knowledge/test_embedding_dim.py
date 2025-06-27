@@ -1,5 +1,7 @@
 import pytest
 
+pytestmark = pytest.mark.slow
+
 pytest.importorskip("httpx")
 
 from helpdesk_ai.llm.ollama_client import OllamaClient  # noqa: E402
